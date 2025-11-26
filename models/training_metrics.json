@@ -1,0 +1,161 @@
+{
+  "timestamp": "2025-11-24T14:42:37.211420",
+  "lookback_days": 90,
+  "models": {
+    "google_ads": {
+      "status": "trained",
+      "channel": "google_ads",
+      "model_type": "xgboost",
+      "model_path": "models\\roas_model_google_ads.json",
+      "features": [
+        "impressions",
+        "clicks",
+        "cost",
+        "ctr",
+        "cpc",
+        "day_of_week",
+        "is_weekend",
+        "month",
+        "log_cost",
+        "log_impressions",
+        "click_impression_ratio"
+      ],
+      "data_splits": {
+        "train": 247,
+        "valid": 56,
+        "test": 52
+      },
+      "baseline_metrics": {
+        "test": {
+          "rmse": 25.04111250203697,
+          "mae": 15.707935052726393,
+          "r2": 0.4499775191184344
+        }
+      },
+      "xgboost_metrics": {
+        "test": {
+          "rmse": 18.993998623980435,
+          "mae": 12.533772725138668,
+          "r2": 0.6835493396404717
+        },
+        "improvement": 24.148742902555277
+      },
+      "ridge_metrics": {
+        "test": {
+          "rmse": 27.330379874761533,
+          "mae": 16.463461552294934,
+          "r2": 0.3448141066359951
+        },
+        "improvement": -9.142035412916828
+      },
+      "best_model": {
+        "name": "xgboost",
+        "metrics": {
+          "rmse": 18.993998623980435,
+          "mae": 12.533772725138668,
+          "r2": 0.6835493396404717
+        },
+        "improvement_vs_baseline": 24.148742902555277
+      },
+      "feature_importance": [
+        {
+          "feature": "cpc",
+          "importance": 0.22440288960933685
+        },
+        {
+          "feature": "click_impression_ratio",
+          "importance": 0.195235013961792
+        },
+        {
+          "feature": "ctr",
+          "importance": 0.18886390328407288
+        },
+        {
+          "feature": "day_of_week",
+          "importance": 0.09233445674180984
+        },
+        {
+          "feature": "month",
+          "importance": 0.0532110370695591
+        },
+        {
+          "feature": "impressions",
+          "importance": 0.05025196447968483
+        },
+        {
+          "feature": "clicks",
+          "importance": 0.04750585928559303
+        },
+        {
+          "feature": "cost",
+          "importance": 0.04050662741065025
+        },
+        {
+          "feature": "log_impressions",
+          "importance": 0.038727056235075
+        },
+        {
+          "feature": "is_weekend",
+          "importance": 0.03459354490041733
+        }
+      ]
+    },
+    "meta_ads": {
+      "status": "trained",
+      "channel": "meta_ads",
+      "model_type": "baseline",
+      "model_path": null,
+      "features": [
+        "impressions",
+        "clicks",
+        "cost",
+        "ctr",
+        "cpc",
+        "day_of_week",
+        "is_weekend",
+        "month",
+        "log_cost",
+        "log_impressions",
+        "click_impression_ratio"
+      ],
+      "data_splits": {
+        "train": 293,
+        "valid": 73,
+        "test": 73
+      },
+      "baseline_metrics": {
+        "test": {
+          "rmse": 19.930274609710604,
+          "mae": 15.144572889941433,
+          "r2": 0.5674163207653483
+        }
+      },
+      "xgboost_metrics": {
+        "test": {
+          "rmse": 30.62340608030398,
+          "mae": 22.062863591073878,
+          "r2": -0.021293461348928844
+        },
+        "improvement": -53.65270514327671
+      },
+      "ridge_metrics": {
+        "test": {
+          "rmse": 32.01186251320259,
+          "mae": 22.66506924273414,
+          "r2": -0.11600322783521522
+        },
+        "improvement": -60.6192746466498
+      },
+      "best_model": {
+        "name": "baseline",
+        "metrics": {
+          "rmse": 19.930274609710604,
+          "mae": 15.144572889941433,
+          "r2": 0.5674163207653483
+        },
+        "improvement_vs_baseline": 0.0
+      },
+      "feature_importance": []
+    }
+  }
+}
