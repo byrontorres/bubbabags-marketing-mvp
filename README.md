@@ -545,11 +545,6 @@ gcloud auth application-default login
 - [ ] **Deployment** en GCP Cloud Run
 - [ ] **Workflows n8n** adicionales para reportes automáticos
 
----
-
-## Licencia
-
-Este proyecto es privado y propiedad de Nueva EPS / Bubbabags.
 
 ---
 
