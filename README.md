@@ -1,11 +1,12 @@
-﻿# Bubbabags Marketing Platform
+﻿# Bubbabags Marketing Intelligence Platform
 
-Plataforma integral de marketing con ML, análisis conversacional y automatización mediante bot de Telegram.
+Plataforma integral de inteligencia de marketing con ML, análisis conversacional y automatización mediante **n8n** para orquestación del bot de Telegram.
 
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![BigQuery](https://img.shields.io/badge/BigQuery-Enabled-orange)
 ![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o--mini-green)
 ![Docker](https://img.shields.io/badge/Docker-Compose-blue)
+![n8n](https://img.shields.io/badge/n8n-Automation-red)
 
 ---
 
@@ -33,7 +34,7 @@ Plataforma integral de marketing con ML, análisis conversacional y automatizaci
 - **Análisis de Campañas**: Métricas en tiempo real de Google Ads y Meta Ads
 - **Predicción de ROAS**: Modelo XGBoost entrenado (R² 0.684, +24% vs baseline)
 - **Agente Conversacional**: Responde preguntas en lenguaje natural con OpenAI
-- **Bot de Telegram**: Interacción 100% automatizada via @bubbabags_mkt_bot
+- **Bot de Telegram**: Automatizado 100% con **n8n** workflow engine
 - **Dashboard Interactivo**: Visualización con Streamlit
 - **API REST**: 6 endpoints para integración con sistemas externos
 
@@ -55,7 +56,7 @@ Plataforma integral de marketing con ML, análisis conversacional y automatizaci
 | **LLM** | OpenAI GPT-4o-mini | Latest | Agente conversacional |
 | **API** | FastAPI | Latest | Backend API REST |
 | **Frontend** | Streamlit | Latest | Dashboard interactivo |
-| **Automation** | n8n | 1.121.2 | Orquestación y chatbot |
+| **Automation** | n8n | 1.121.2 | **Orquestación del bot de Telegram** |
 | **Containerización** | Docker Compose | Latest | Despliegue de servicios |
 | **Chat** | Telegram Bot API | Latest | Interfaz conversacional |
 
@@ -71,6 +72,12 @@ Plataforma integral de marketing con ML, análisis conversacional y automatizaci
      │  Telegram   │       │ Streamlit  │
      │    Bot      │       │     UI     │
      └──────┬──────┘       └─────┬──────┘
+            │                    │
+      ┌─────▼────────┐           │
+      │     n8n      │           │
+      │  Workflow    │           │
+      │  Engine      │           │
+      └─────┬────────┘           │
             │                    │
             └────────┬───────────┘
                      │
@@ -92,14 +99,15 @@ Plataforma integral de marketing con ML, análisis conversacional y automatizaci
    └──────────┘            └─────────────┘
 ```
 
-### Flujo de Datos
+### Flujo de Datos - Bot de Telegram con n8n
 
-1. **Usuario** → Envía pregunta via Telegram o Streamlit
-2. **n8n/API** → Recibe y procesa la solicitud
-3. **Agente OpenAI** → Interpreta la pregunta y decide qué herramientas usar
-4. **BigQuery** → Consulta datos de campañas
-5. **Modelo XGBoost** → Genera predicciones de ROAS
-6. **Respuesta** → Devuelve insights en lenguaje natural
+1. **Usuario** → Envía mensaje a @bubbabags_mkt_bot
+2. **n8n Workflow** → Captura mensaje cada 30 segundos
+3. **n8n IF Node** → Filtra mensajes nuevos (anti-duplicados)
+4. **n8n HTTP Request** → Llama a `/api/ask` con la pregunta
+5. **Agente OpenAI** → Interpreta y ejecuta herramientas
+6. **BigQuery + XGBoost** → Obtiene datos y predicciones
+7. **n8n HTTP Request** → Envía respuesta al usuario vía Telegram
 
 ---
 
@@ -111,7 +119,7 @@ Plataforma integral de marketing con ML, análisis conversacional y automatizaci
 - Docker & Docker Compose
 - Cuenta de Google Cloud con BigQuery habilitado
 - API Key de OpenAI
-- Bot de Telegram (opcional)
+- Bot de Telegram (opcional, para usar la función de chatbot)
 
 ### 1. Clonar el repositorio
 ```bash
@@ -130,8 +138,8 @@ BQ_DATASET=marketing_analytics
 # OpenAI
 OPENAI_API_KEY=sk-proj-...
 
-# Telegram (opcional)
-TELEGRAM_BOT_TOKEN=8369381885:AAHxkHFMt9UT5lMx3U18fMthOpFoYlkrY10
+# Telegram (opcional - solo si usas el bot)
+TELEGRAM_BOT_TOKEN=tu-token-telegram
 ```
 
 ### 3. Autenticar con Google Cloud
@@ -154,6 +162,16 @@ Esto levantará 3 servicios:
 ## Uso
 
 ### Bot de Telegram
+
+#### ¿Qué es n8n?
+
+**n8n** es un workflow automation tool que orquesta todo el flujo del bot de Telegram:
+- Consulta mensajes cada 30 segundos
+- Filtra mensajes ya procesados
+- Llama a la API de Bubbabags
+- Envía respuestas de vuelta al usuario
+
+Todo esto funciona **100% automático** sin intervención manual.
 
 #### Acceso Directo
 - **Username**: @bubbabags_mkt_bot
@@ -181,18 +199,19 @@ Bot: Te recomiendo aumentar inversión en "marzo | metrix"
 #### Tipos de Consultas Soportadas
 
 Comparación de canales (Google Ads vs Meta Ads)  
-Top campañas por rendimiento  
-Predicciones de ROAS con ML  
-Evolución de KPIs (CTR, ROAS, costos)  
-Rendimiento mensual por campaña  
-Recomendaciones de inversión  
+- Top campañas por rendimiento  
+- Predicciones de ROAS con ML  
+- Evolución de KPIs (CTR, ROAS, costos)  
+- Rendimiento mensual por campaña  
+- Recomendaciones de inversión  
 
 #### Características Técnicas
 
-- **Tiempo de respuesta**: 30 segundos (máximo)
-- **Actualización**: Automática cada 30 segundos
+- **Tiempo de respuesta**: ~30 segundos (máximo)
+- **Automatización**: n8n workflow ejecuta cada 30 segundos
 - **IA**: GPT-4o-mini con function calling
 - **Datos**: Consultas en tiempo real a BigQuery
+- **Anti-duplicados**: Filtro temporal en n8n
 
 ---
 
@@ -222,7 +241,7 @@ http://localhost:8501
 
 ---
 
-### 🔌 API REST
+### API REST
 
 #### Base URL
 ```
@@ -301,6 +320,8 @@ Content-Type: application/json
 }
 ```
 
+**Nota:** Este endpoint es consumido por el workflow de n8n para el bot de Telegram.
+
 #### Documentación Interactiva
 
 FastAPI genera documentación automática:
@@ -315,7 +336,7 @@ http://localhost:8002/docs
 bubbabags-mvp/
 ├── src/
 │   ├── config.py              # Configuración y settings
-│   ├── api_simple.py          # API FastAPI
+│   ├── api_simple.py          # API FastAPI con endpoint /api/ask
 │   ├── agent/
 │   │   └── agent.py           # Agente OpenAI con function calling
 │   ├── data/
@@ -332,7 +353,7 @@ bubbabags-mvp/
 │   └── training_metrics.json       # Métricas del modelo
 ├── docker/
 │   ├── Dockerfile
-│   └── docker-compose.yml     # 3 servicios
+│   └── docker-compose.yml     # 3 servicios (streamlit, api, n8n)
 ├── scripts/
 │   ├── run_ui.py
 │   └── train_model.py
@@ -378,11 +399,20 @@ El modelo se actualiza con datos históricos de BigQuery.
 
 ---
 
-## 🔧 Configuración de n8n
+## Configuración de n8n
+
+### ¿Por qué n8n para el Bot de Telegram?
+
+**n8n** es una plataforma de automatización workflow-based que permite:
+- Orquestar procesos complejos sin código
+- Integrar múltiples servicios (Telegram + API + BigQuery)
+- Programar ejecuciones automáticas
+- Implementar lógica condicional (filtros anti-duplicados)
+- Debugging visual de flujos
 
 ### Workflow: Bot de Telegram
 
-El workflow está configurado para responder automáticamente a mensajes en Telegram.
+El workflow está configurado para responder automáticamente a mensajes en Telegram cada 30 segundos.
 
 #### Componentes del Workflow
 ```
@@ -402,14 +432,23 @@ HTTP Request1 (Send Telegram Message)
 - **Trigger Interval**: Seconds
 - **Seconds Between Triggers**: 30
 
-#### Configuración del IF
+**Propósito:** Ejecutar el workflow automáticamente cada 30 segundos.
+
+#### Configuración del Nodo IF (Anti-duplicados)
 
 **Condición:**
 - **Value 1**: `{{ $json.result[0].message.date }}`
 - **Operation**: is greater than
 - **Value 2**: `{{ Math.floor(Date.now() / 1000) - 30 }}`
 
-**Propósito:** Procesar solo mensajes de los últimos 30 segundos.
+**Propósito:** Procesar solo mensajes de los últimos 30 segundos para evitar respuestas duplicadas.
+
+#### HTTP Request (Get Updates)
+
+**Method**: GET  
+**URL**: `https://api.telegram.org/bot{TOKEN}/getUpdates?offset=-1`
+
+**Propósito:** Obtener el último mensaje enviado al bot.
 
 #### HTTP Request2 (Llamada al Agente)
 
@@ -422,6 +461,8 @@ HTTP Request1 (Send Telegram Message)
 }
 ```
 
+**Propósito:** Enviar la pregunta del usuario al agente conversacional.
+
 #### HTTP Request1 (Respuesta a Telegram)
 
 **Method**: POST  
@@ -430,12 +471,21 @@ HTTP Request1 (Send Telegram Message)
 - **chat_id**: `{{ $('HTTP Request').item.json.result[0].message.chat.id }}`
 - **text**: `{{ $('HTTP Request2').item.json.answer }}`
 
+**Propósito:** Enviar la respuesta del agente de vuelta al usuario en Telegram.
+
 ### Activación del Workflow
 
 1. Abre n8n: http://localhost:5678
-2. Importa el workflow (si no existe)
-3. Activa el toggle "Active"
-4. El bot empezará a responder automáticamente
+2. El workflow "Telegram Bot" debe estar visible
+3. Activa el toggle "Active" (arriba a la derecha)
+4. El bot empezará a responder automáticamente cada 30 segundos
+
+### Monitoreo
+
+Para ver las ejecuciones del workflow:
+- Click en **"Executions"** (arriba en n8n)
+- Verás historial de cada ejecución
+- Puedes debuggear errores viendo los outputs de cada nodo
 
 ---
 
@@ -469,7 +519,7 @@ gcloud auth application-default login
 
 ---
 
-## Próximas Mejoras (V2)
+## Próximas Mejoras
 
 ### Features Planificados
 
@@ -477,7 +527,7 @@ gcloud auth application-default login
 - [ ] **Sistema robusto anti-duplicados** con tracking de message_id
 - [ ] **Notificaciones proactivas** de anomalías en campañas
 - [ ] **Gráficos en respuestas** de Telegram
-- [ ] **Integración con Slack**
+- [ ] **Integración con Slack** usando n8n
 - [ ] **Dashboard en tiempo real** con WebSockets
 - [ ] **A/B Testing automatizado**
 - [ ] **Recomendaciones de optimización** con RL
@@ -493,14 +543,19 @@ gcloud auth application-default login
 - [ ] **Rate limiting** en API
 - [ ] **Cache** con Redis
 - [ ] **Deployment** en GCP Cloud Run
+- [ ] **Workflows n8n** adicionales para reportes automáticos
 
 ---
 
+## Licencia
+
+Este proyecto es privado y propiedad de Nueva EPS / Bubbabags.
+
+---
 
 ## Contribuidores
 
 - **Byron Torres** - Data Engineer - [GitHub](https://github.com/byrontorres)
-
 
 
 **Última actualización**: 26 de noviembre de 2025
