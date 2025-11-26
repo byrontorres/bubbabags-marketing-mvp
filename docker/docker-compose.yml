@@ -1,34 +1,22 @@
-﻿version: "3.8"
-
-services:
-  api:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-    ports:
-      - "8000:8000"
-    env_file:
-      - ../.env
-    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
-    networks:
-      - bubbabags-network
-
-  ui:
+﻿services:
+  bubbabags:
     build:
       context: ..
       dockerfile: docker/Dockerfile
     ports:
       - "8501:8501"
-    environment:
-      - API_URL=http://api:8000
     env_file:
       - ../.env
-    command: streamlit run ui/app.py --server.port 8501 --server.address 0.0.0.0
-    depends_on:
-      - api
-    networks:
-      - bubbabags-network
+    environment:
+      - PYTHONPATH=/app
+      - GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json
+    volumes:
+      # Montar modelos
+      - ../models:/app/models:ro
+      # Montar credenciales de Google Cloud
+      - ${APPDATA}/gcloud:/root/.config/gcloud:ro
+    restart: unless-stopped
 
 networks:
-  bubbabags-network:
-    driver: bridge
+  default:
+    name: bubbabags-network
