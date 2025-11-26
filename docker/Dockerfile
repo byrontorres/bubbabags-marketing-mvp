@@ -14,6 +14,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Instalar uvicorn para API
+RUN pip install uvicorn
+
 # Copiar código fuente
 COPY src/ ./src/
 COPY ui/ ./ui/
@@ -23,8 +26,8 @@ COPY models/ ./models/
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 
-# Puerto de Streamlit
-EXPOSE 8501
+# Puertos
+EXPOSE 8501 8002
 
-# Comando por defecto: ejecutar Streamlit
+# Comando por defecto: Streamlit
 CMD ["streamlit", "run", "ui/app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]

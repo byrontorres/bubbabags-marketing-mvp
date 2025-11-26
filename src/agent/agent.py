@@ -52,10 +52,10 @@ def get_top_campaigns() -> str:
     """Obtiene las campañas con mejor ROAS."""
     try:
         df = get_top_campaigns_by_predicted_roas(top_n=10)
-        
+
         if df.empty:
             return json.dumps({"mensaje": "No hay datos disponibles"})
-        
+
         result = []
         for _, row in df.iterrows():
             result.append({
@@ -77,9 +77,9 @@ def get_monthly_performance() -> str:
         
         if df.empty:
             return json.dumps({"mensaje": "No hay datos disponibles"})
-        
+
         df = df.head(15)
-        
+
         result = []
         for _, row in df.iterrows():
             result.append({
@@ -103,19 +103,19 @@ def get_predictions_info() -> str:
     try:
         summary = get_prediction_summary()
         top_df = get_top_campaigns_by_predicted_roas(top_n=5)
-        
+
         result = {
             "sistema": summary,
             "top_campanas_predichas": []
         }
-        
+
         for _, row in top_df.iterrows():
             result["top_campanas_predichas"].append({
                 "campana": row["campaign_name"][:40],
                 "canal": row["channel"],
                 "roas_esperado": round(row["predicted_roas"], 2)
             })
-        
+
         return json.dumps(result, ensure_ascii=False, indent=2)
     except Exception as e:
         return json.dumps({"error": str(e)})
@@ -125,21 +125,21 @@ def get_kpi_evolution() -> str:
     """Obtiene evolución de KPIs por día y canal."""
     try:
         df = get_campaign_performance_daily()
-        
+
         if df.empty:
             return json.dumps({"mensaje": "No hay datos disponibles"})
-        
+
         daily = df.groupby(["date", "channel"]).agg({
             "impressions": "sum",
             "clicks": "sum",
             "cost": "sum",
             "revenue": "sum"
         }).reset_index()
-        
+
         daily["ctr"] = (daily["clicks"] / daily["impressions"] * 100).round(2)
         daily["roas"] = (daily["revenue"] / daily["cost"]).round(2)
         daily = daily.sort_values("date", ascending=False).head(14)
-        
+
         result = []
         for _, row in daily.iterrows():
             result.append({
@@ -149,7 +149,7 @@ def get_kpi_evolution() -> str:
                 "roas": float(row["roas"]) if row["roas"] else 0,
                 "costo": round(row["cost"], 2)
             })
-        
+
         return json.dumps(result, ensure_ascii=False, indent=2)
     except Exception as e:
         return json.dumps({"error": str(e)})
@@ -192,7 +192,7 @@ tools = [
         }
     },
     {
-        "type": "function", 
+        "type": "function",
         "function": {
             "name": "get_kpi_evolution",
             "description": "Muestra la evolución de KPIs (CTR, ROAS, costos) por día y canal en las últimas 2 semanas.",
@@ -231,12 +231,12 @@ Para predicciones, explica que:
 
 def ask(question: str, verbose: bool = False) -> str:
     """Hace una pregunta al agente y retorna la respuesta."""
-    
+
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": question}
     ]
-    
+
     # Primera llamada: el modelo decide si usar tools
     response = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -244,42 +244,56 @@ def ask(question: str, verbose: bool = False) -> str:
         tools=tools,
         tool_choice="auto"
     )
-    
+
     assistant_message = response.choices[0].message
-    
+
     # Si el modelo quiere usar tools
     if assistant_message.tool_calls:
         messages.append(assistant_message)
-        
+
         for tool_call in assistant_message.tool_calls:
             function_name = tool_call.function.name
-            
+
             if verbose:
                 print(f"  [Tool: {function_name}]")
-            
+
             # Ejecutar la función
             if function_name in AVAILABLE_FUNCTIONS:
                 function_response = AVAILABLE_FUNCTIONS[function_name]()
             else:
                 function_response = json.dumps({"error": f"Función {function_name} no encontrada"})
-            
+
             messages.append({
                 "role": "tool",
                 "tool_call_id": tool_call.id,
                 "name": function_name,
                 "content": function_response
             })
-        
+
         # Segunda llamada: el modelo genera la respuesta final
         final_response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages
         )
-        
+
         return final_response.choices[0].message.content
-    
+
     else:
         return assistant_message.content
+
+
+def run_agent(question: str) -> str:
+    """
+    Función wrapper para compatibilidad con la API.
+    Ejecuta el agente con una pregunta y retorna la respuesta.
+    
+    Args:
+        question: Pregunta en lenguaje natural sobre campañas de marketing
+        
+    Returns:
+        Respuesta del agente en formato texto
+    """
+    return ask(question, verbose=False)
 
 
 # =============================================================================
@@ -289,13 +303,13 @@ if __name__ == "__main__":
     print("=" * 60)
     print("AGENTE DE MARKETING - BUBBABAGS")
     print("=" * 60)
-    
+
     test_questions = [
         "¿Cuál canal tiene mejor ROAS, Google Ads o Meta Ads?",
         "¿Cuál fue la campaña con mayor ROAS?",
         "¿Qué campaña debería tener mejor rendimiento en el futuro?"
     ]
-    
+
     for q in test_questions:
         print(f"\n>>> PREGUNTA: {q}")
         print("-" * 40)

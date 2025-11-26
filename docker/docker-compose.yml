@@ -1,5 +1,8 @@
 ﻿services:
-  bubbabags:
+  # ==========================================
+  # INTERFAZ STREAMLIT
+  # ==========================================
+  streamlit:
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -11,11 +14,49 @@
       - PYTHONPATH=/app
       - GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json
     volumes:
-      # Montar modelos
       - ../models:/app/models:ro
-      # Montar credenciales de Google Cloud
       - ${APPDATA}/gcloud:/root/.config/gcloud:ro
     restart: unless-stopped
+
+  # ==========================================
+  # API PARA N8N
+  # ==========================================
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8002:8002"
+    env_file:
+      - ../.env
+    environment:
+      - PYTHONPATH=/app
+      - GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json
+    volumes:
+      - ../models:/app/models:ro
+      - ${APPDATA}/gcloud:/root/.config/gcloud:ro
+    command: uvicorn src.api_simple:app --host 0.0.0.0 --port 8002
+    restart: unless-stopped
+
+  # ==========================================
+  # N8N - AUTOMATIZACIÓN
+  # ==========================================
+  n8n:
+    image: n8nio/n8n:latest
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=false
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678/
+    volumes:
+      - n8n_data:/home/node/.n8n
+    restart: unless-stopped
+
+volumes:
+  n8n_data:
 
 networks:
   default:
