@@ -10,6 +10,18 @@ Plataforma integral de inteligencia de marketing con ML, análisis conversaciona
 
 ---
 
+### [Ver Documentación Técnica →](https://byrontorres.github.io/bubbabags-marketing-mvp/)
+
+La documentación incluye:
+- Flujos BPMN de procesos end-to-end
+- Capa de datos con ejemplos de vistas SQL y tablas
+- Pipeline completo de Machine Learning con métricas
+- Configuración detallada de n8n + Telegram Bot
+- Ejemplos de código con datos reales
+- Stack tecnológico y decisiones de arquitectura
+
+---
+
 ## Tabla de Contenidos
 
 - [Características](#-características)
